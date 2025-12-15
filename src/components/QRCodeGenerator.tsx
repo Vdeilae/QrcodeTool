@@ -1,13 +1,44 @@
 // src/components/QRCodeGenerator.tsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
+
+interface HistoryItem {
+  id: string;
+  content: string;
+  qrCodeUrl: string;
+  timestamp: Date;
+}
 
 const QRCodeGenerator: React.FC = () => {
   const [text, setText] = useState<string>('https://www.example.com');
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  // 从本地存储加载历史记录
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('qrGenerationHistory');
+    if (savedHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedHistory);
+        // 转换时间戳为Date对象
+        const historyWithDates = parsedHistory.map((item: any) => ({
+          ...item,
+          timestamp: new Date(item.timestamp)
+        }));
+        setHistory(historyWithDates);
+      } catch (e) {
+        console.error('Failed to parse history', e);
+      }
+    }
+  }, []);
+
+  // 保存历史记录到本地存储
+  const saveHistory = (newHistory: HistoryItem[]) => {
+    setHistory(newHistory);
+    localStorage.setItem('qrGenerationHistory', JSON.stringify(newHistory));
+  };
 
   const generateQRCode = async () => {
     if (!text.trim()) {
@@ -30,6 +61,17 @@ const QRCodeGenerator: React.FC = () => {
       });
       
       setQrCodeUrl(url);
+      
+      // 添加到历史记录
+      const newHistoryItem: HistoryItem = {
+        id: Date.now().toString(),
+        content: text,
+        qrCodeUrl: url,
+        timestamp: new Date()
+      };
+      
+      const newHistory = [newHistoryItem, ...history.slice(0, 19)]; // 限制最多20条记录
+      saveHistory(newHistory);
     } catch (err) {
       setError('生成二维码失败: ' + (err as Error).message);
       console.error('QR Code generation error:', err);
@@ -47,6 +89,20 @@ const QRCodeGenerator: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const downloadHistoryQRCode = (url: string, index: number) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `qrcode-${index + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('qrGenerationHistory');
   };
 
   return (
@@ -93,6 +149,45 @@ const QRCodeGenerator: React.FC = () => {
           >
             下载二维码
           </button>
+        </div>
+      )}
+
+      {/* 生成历史记录 */}
+      {history.length > 0 && (
+        <div className="generation-history">
+          <div className="history-header">
+            <h3>生成历史</h3>
+            <button onClick={clearHistory} className="clear-history-button">
+              清空历史
+            </button>
+          </div>
+          <div className="history-list">
+            {history.map((item, index) => (
+              <div key={item.id} className="history-item">
+                <div className="history-content">
+                  <p className="history-text">{item.content}</p>
+                  <div className="history-qrcode">
+                    <img 
+                      src={item.qrCodeUrl} 
+                      alt={`QR Code ${index + 1}`} 
+                      className="history-qrcode-image"
+                    />
+                  </div>
+                  <div className="history-actions">
+                    <button 
+                      onClick={() => downloadHistoryQRCode(item.qrCodeUrl, index)}
+                      className="history-download-button"
+                    >
+                      下载
+                    </button>
+                  </div>
+                  <div className="history-time">
+                    {item.timestamp.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

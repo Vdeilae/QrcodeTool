@@ -1,69 +1,69 @@
-# React + TypeScript + Vite
+# 二维码工具
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![ESA Logo](https://img.alicdn.com/imgextra/i3/O1CN01H1UU3i1Cti9lYtFrs_!!6000000000139-2-tps-7534-844.png)
 
-Currently, two official plugins are available:
+> 本项目由阿里云ESA提供加速、计算和保护
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 项目简介
 
-## Expanding the ESLint configuration
+二维码工具是一个基于React + TypeScript构建的现代化Web应用程序，专注于提供完整的二维码生成与识别功能。该工具利用浏览器端的图像处理能力和二维码编解码技术，为用户提供便捷的二维码操作体验。
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 项目特色
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- 📱 **双模式支持**: 支持二维码生成和扫描识别两大核心功能
+- 🔄 **实时扫描**: 支持摄像头实时扫描、图片文件上传识别和粘贴板图像识别
+- 💾 **本地存储**: 自动生成历史记录，数据持久化保存在本地
+- 🎨 **响应式设计**: 完美适配移动端和PC端，提供一致的用户体验
+- ⚡ **即时处理**: 所有二维码处理均在客户端完成，无服务器依赖
+- 🔒 **隐私保护**: 数据处理完全在本地进行，保障用户隐私安全
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+## 核心功能
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 二维码生成
+- 支持任意文本内容转换为二维码
+- 可自定义生成内容，包括网址、联系方式、文本等
+- 一键下载生成的二维码图片
+- 自动生成历史记录，方便重复使用
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 二维码扫描
+- **摄像头扫描**: 调用设备摄像头进行实时二维码识别
+- **文件上传**: 支持图片文件上传进行二维码识别
+- **粘贴板识别**: 支持Ctrl+V快捷键粘贴图片直接识别
+- 扫描历史记录：自动保存所有扫描结果
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 历史记录管理
+- 分别维护生成历史和扫描历史
+- 每条记录包含时间戳和内容详情
+- 支持历史记录清空功能
+- 历史记录本地持久化存储
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 用户体验
+- 简洁直观的操作界面
+- 响应式布局适配各种设备屏幕
+- 深色模式自动适配系统主题
+- 流畅的交互动效和即时反馈
+
+## 技术架构
+
+- **前端框架**: React 18 + TypeScript
+- **构建工具**: Vite
+- **核心库**: 
+  - [qrcode](file://e:\Code\Nodejs\SilentAirwaves\node_modules\qrcode\bin\qrcode) - 二维码生成
+  - `jsqr` - 二维码识别
+- **样式方案**: 原生CSS + 响应式设计
+- **部署平台**: 阿里云边缘安全加速(ESA)
+
+## 使用场景
+
+- 快速生成个人网站、社交媒体链接的二维码
+- 扫描纸质文档中的二维码获取信息
+- 批量处理二维码图片识别
+- 跨设备信息传输（通过二维码媒介）
+- 日常开发调试中的二维码测试
+
+## 部署优势
+
+- 基于阿里云ESA边缘节点，全球用户享受低延迟访问体验
+- 静态资源边缘缓存，提升加载速度
+- HTTPS安全加密传输
+- 无服务器架构，降低运维成本

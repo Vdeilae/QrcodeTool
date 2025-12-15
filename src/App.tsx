@@ -39,7 +39,7 @@ function App() {
 
       {/* 简洁页脚 */}
       <footer className="app-footer-simple">
-        <p>二维码生成与识别工具</p>
+        <p>二维码生成与识别工具（幻乐科技制作 vfun@vfun.top）</p>
       </footer>
     </div>
   )

@@ -593,3 +593,91 @@
     max-width: 120px;
   }
 }
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .app-container {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+
+  .content-wrapper {
+    background-color: #2d2d2d;
+    color: #ffffff;
+  }
+
+  .tab-navigation {
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #444;
+  }
+
+  .tab-button {
+    color: #cccccc;
+    background-color: transparent;
+  }
+
+  .tab-button:hover:not(.active) {
+    background-color: #3a3a3a;
+  }
+
+  .app-footer-simple {
+    background-color: #2d2d2d;
+    border-top: 1px solid #444;
+    color: #cccccc;
+  }
+
+  .qr-input {
+    background-color: #3a3a3a;
+    border: 1px solid #555;
+    color: #ffffff;
+  }
+
+  .qr-input:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.4);
+  }
+
+  .qr-input-group label {
+    color: #ffffff;
+  }
+
+  .qr-code-display {
+    background-color: #3a3a3a;
+    border: 1px dashed #555;
+  }
+
+  .result-content p {
+    background-color: #3a3a3a;
+    color: #ffffff;
+  }
+
+  .paste-instruction {
+    background-color: #1a3c5a;
+    color: #a0d0ff;
+  }
+
+  .history-item {
+    background-color: #3a3a3a;
+    border: 1px solid #555;
+  }
+
+  .history-text {
+    color: #ffffff;
+  }
+
+  .history-qrcode-image {
+    border: 1px solid #555;
+  }
+
+  .history-time {
+    color: #cccccc;
+  }
+
+  .generation-history {
+    border-top: 1px solid #444;
+  }
+
+  .history-header h3 {
+    color: #ffffff;
+  }
+}

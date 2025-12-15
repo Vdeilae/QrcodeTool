@@ -11,6 +11,7 @@ const QRCodeScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const scannerRef = useRef<HTMLDivElement>(null) // 添加这一行
 
   // 处理文件上传
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,8 +141,22 @@ const QRCodeScanner: React.FC = () => {
     }
   }, [])
 
+  // 添加这个 effect 来自动聚焦
+  useEffect(() => {
+    // 组件挂载后自动聚焦到扫描区域
+    if (scannerRef.current) {
+      scannerRef.current.tabIndex = -1; // 使 div 可聚焦
+      scannerRef.current.focus();
+    }
+  }, []);
+
   return (
-    <div className="qrcode-scanner" onPaste={handlePaste}>
+    <div 
+      className="qrcode-scanner" 
+      onPaste={handlePaste}
+      ref={scannerRef} // 添加这一行
+      style={{ outline: 'none' }} // 避免聚焦时显示轮廓
+    >
       <h2>扫描二维码</h2>
       
       <div className="scanner-controls">

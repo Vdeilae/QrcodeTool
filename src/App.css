@@ -508,6 +508,7 @@
 }
 
 .history-text {
+  text-align: center;
   margin: 0;
   word-break: break-all;
   font-size: 0.9rem;
@@ -678,6 +679,155 @@
   }
 
   .history-header h3 {
+    color: #ffffff;
+  }
+}
+
+
+/* 扫描历史记录样式 */
+.scan-history {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.scan-history .history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.scan-history .history-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.scan-history .clear-history-button {
+  padding: 0.5rem 1rem;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.scan-history .clear-history-button:hover {
+  background-color: #ff5252;
+}
+
+.scan-history .history-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.scan-history .history-item {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #eee;
+}
+
+.scan-history .history-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.scan-history .history-text {
+  margin: 0;
+  word-break: break-all;
+  font-size: 0.9rem;
+  color: #333;
+  flex: 1;
+}
+
+.scan-history .history-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.scan-history .history-link-button {
+  padding: 0.25rem 0.75rem;
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: background-color 0.3s;
+  width: fit-content;
+}
+
+.scan-history .history-link-button:hover {
+  background-color: #357ae8;
+}
+
+.scan-history .history-time {
+  font-size: 0.75rem;
+  color: #666;
+  text-align: center;
+}
+
+/* 移动端扫描历史记录优化 */
+@media (max-width: 768px) {
+  .scan-history {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+  }
+  
+  .scan-history .history-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .scan-history .clear-history-button {
+    align-self: flex-start;
+  }
+  
+  .scan-history .history-list {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .scan-history .history-item {
+    padding: 0.75rem;
+  }
+  
+  .scan-history .history-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .scan-history .history-item {
+    padding: 0.5rem;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .scan-history .history-item {
+    background-color: #3a3a3a;
+    border: 1px solid #555;
+  }
+
+  .scan-history .history-text {
+    color: #ffffff;
+  }
+
+  .scan-history .history-time {
+    color: #cccccc;
+  }
+
+  .scan-history {
+    border-top: 1px solid #444;
+  }
+
+  .scan-history .history-header h3 {
     color: #ffffff;
   }
 }

@@ -1,17 +1,83 @@
 // src/components/QRCodeScanner.tsx
 import React, { useState, useRef, useEffect } from 'react'
 import jsQR from 'jsqr'
+import QRCode from 'qrcode'
+
+interface HistoryItem {
+  id: string;
+  content: string;
+  qrCodeUrl: string;
+  timestamp: Date;
+}
 
 const QRCodeScanner: React.FC = () => {
   const [scanResult, setScanResult] = useState<string>('')
   const [isScanning, setIsScanning] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [useCamera, setUseCamera] = useState<boolean>(false)
+  const [scanHistory, setScanHistory] = useState<HistoryItem[]>([]);
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const scannerRef = useRef<HTMLDivElement>(null) // 添加这一行
+  const scannerRef = useRef<HTMLDivElement>(null)
+
+  // 从本地存储加载扫描历史记录
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('qrScanHistory');
+    if (savedHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedHistory);
+        // 转换时间戳为Date对象
+        const historyWithDates = parsedHistory.map((item: any) => ({
+          ...item,
+          timestamp: new Date(item.timestamp)
+        }));
+        setScanHistory(historyWithDates);
+      } catch (e) {
+        console.error('Failed to parse scan history', e);
+      }
+    }
+  }, []);
+
+  // 保存扫描历史记录到本地存储
+  const saveScanHistory = (newHistory: HistoryItem[]) => {
+    setScanHistory(newHistory);
+    localStorage.setItem('qrScanHistory', JSON.stringify(newHistory));
+  };
+
+  // 生成二维码URL
+  const generateQRCodeUrl = async (content: string): Promise<string> => {
+    try {
+      const url = await QRCode.toDataURL(content, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000FF',
+          light: '#FFFFFFFF'
+        }
+      });
+      return url;
+    } catch (err) {
+      console.error('QR Code generation error:', err);
+      return '';
+    }
+  };
+
+  // 添加扫描结果到历史记录
+  const addToScanHistory = async (content: string) => {
+    const qrCodeUrl = await generateQRCodeUrl(content);
+    
+    const newHistoryItem: HistoryItem = {
+      id: Date.now().toString(),
+      content: content,
+      qrCodeUrl: qrCodeUrl,
+      timestamp: new Date()
+    };
+    
+    const newHistory = [newHistoryItem, ...scanHistory.slice(0, 19)]; // 限制最多20条记录
+    saveScanHistory(newHistory);
+  }
 
   // 处理文件上传
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +125,8 @@ const QRCodeScanner: React.FC = () => {
         if (code) {
           setScanResult(code.data)
           setError('')
+          // 添加到扫描历史记录
+          addToScanHistory(code.data)
         } else {
           setError('未检测到二维码')
         }
@@ -116,6 +184,8 @@ const QRCodeScanner: React.FC = () => {
       
       if (code) {
         setScanResult(code.data)
+        // 添加到扫描历史记录
+        addToScanHistory(code.data)
         stopCamera()
         return
       }
@@ -150,12 +220,27 @@ const QRCodeScanner: React.FC = () => {
     }
   }, []);
 
+  const clearScanHistory = () => {
+    setScanHistory([]);
+    localStorage.removeItem('qrScanHistory');
+  };
+
+  // 下载历史记录中的二维码
+  const downloadHistoryQRCode = (url: string, index: number) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `scanned-qrcode-${index + 1}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div 
       className="qrcode-scanner" 
       onPaste={handlePaste}
-      ref={scannerRef} // 添加这一行
-      style={{ outline: 'none' }} // 避免聚焦时显示轮廓
+      ref={scannerRef}
+      style={{ outline: 'none' }}
     >
       <h2>扫描二维码</h2>
       
@@ -226,6 +311,45 @@ const QRCodeScanner: React.FC = () => {
             >
               访问链接
             </a>
+          </div>
+        </div>
+      )}
+
+      {/* 扫描历史记录 */}
+      {scanHistory.length > 0 && (
+        <div className="scan-history">
+          <div className="history-header">
+            <h3>扫描历史</h3>
+            <button onClick={clearScanHistory} className="clear-history-button">
+              清空历史
+            </button>
+          </div>
+          <div className="history-list">
+            {scanHistory.map((item, index) => (
+              <div key={item.id} className="history-item">
+                <div className="history-content">
+                  <p className="history-text">{item.content}</p>
+                  <div className="history-qrcode">
+                    <img 
+                      src={item.qrCodeUrl} 
+                      alt={`Scanned QR Code ${index + 1}`} 
+                      className="history-qrcode-image"
+                    />
+                  </div>
+                  <div className="history-actions">
+                    <button 
+                      onClick={() => downloadHistoryQRCode(item.qrCodeUrl, index)}
+                      className="history-download-button"
+                    >
+                      下载
+                    </button>
+                  </div>
+                  <div className="history-time">
+                    {item.timestamp.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

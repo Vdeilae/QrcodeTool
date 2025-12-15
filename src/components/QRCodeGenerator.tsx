@@ -5,13 +5,13 @@ import QRCode from 'qrcode';
 interface HistoryItem {
   id: string;
   content: string;
-  qrCodeUrl: string;
+  qrCode: string;
   timestamp: Date;
 }
 
 const QRCodeGenerator: React.FC = () => {
   const [text, setText] = useState<string>('https://www.example.com');
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [qrCode, setqrCode] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -60,13 +60,13 @@ const QRCodeGenerator: React.FC = () => {
         }
       });
       
-      setQrCodeUrl(url);
+      setqrCode(url);
       
       // 添加到历史记录
       const newHistoryItem: HistoryItem = {
         id: Date.now().toString(),
         content: text,
-        qrCodeUrl: url,
+        qrCode: url,
         timestamp: new Date()
       };
       
@@ -81,10 +81,10 @@ const QRCodeGenerator: React.FC = () => {
   };
 
   const downloadQRCode = () => {
-    if (!qrCodeUrl) return;
+    if (!qrCode) return;
     
     const link = document.createElement('a');
-    link.href = qrCodeUrl;
+    link.href = qrCode;
     link.download = 'qrcode.png';
     document.body.appendChild(link);
     link.click();
@@ -135,11 +135,11 @@ const QRCodeGenerator: React.FC = () => {
         </div>
       )}
 
-      {qrCodeUrl && (
+      {qrCode && (
         <div className="qr-code-display">
           <h3>生成的二维码:</h3>
           <img 
-            src={qrCodeUrl} 
+            src={qrCode} 
             alt="Generated QR Code" 
             className="qr-code-image"
           />
@@ -168,14 +168,14 @@ const QRCodeGenerator: React.FC = () => {
                   <p className="history-text">{item.content}</p>
                   <div className="history-qrcode">
                     <img 
-                      src={item.qrCodeUrl} 
+                      src={item.qrCode} 
                       alt={`QR Code ${index + 1}`} 
                       className="history-qrcode-image"
                     />
                   </div>
                   <div className="history-actions">
                     <button 
-                      onClick={() => downloadHistoryQRCode(item.qrCodeUrl, index)}
+                      onClick={() => downloadHistoryQRCode(item.qrCode, index)}
                       className="history-download-button"
                     >
                       下载

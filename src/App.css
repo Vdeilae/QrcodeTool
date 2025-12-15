@@ -1,198 +1,455 @@
 /* src/App.css */
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+.app-header-simple {
+  background-color: #4a90e2;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 500;
+}
+
+.tab-navigation {
+  display: flex;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+.tab-button {
+  padding: 1rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #666;
+  transition: all 0.3s ease;
+  flex: 1;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafba);
+.tab-button.active {
+  color: #4a90e2;
+  border-bottom: 3px solid #4a90e2;
+  font-weight: 500;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.tab-button:hover:not(.active) {
+  background-color: #f0f0f0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-top: 1rem;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-.tabs {
+.main-content-split {
+  flex: 1;
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
-.tabs button {
-  padding: 0.75rem 1.5rem;
-  margin: 0 0.5rem;
-  border: none;
-  border-radius: 4px;
-  background-color: #e0e0e0;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.tabs button.active {
-  background-color: #646cff;
-  color: white;
-}
-
-.tabs button:hover {
-  opacity: 0.9;
-}
-
-.form-group {
+.content-wrapper {
+  width: 100%;
+  max-width: 100%;
+  background: white;
+  padding: 1rem;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  min-height: calc(100vh - 120px);
 }
 
-.input-field, .textarea-field {
+.app-footer-simple {
+  text-align: center;
+  padding: 1rem;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  color: #666;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* QR Code Generator Styles */
+.qr-generator {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.qr-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.qr-input-group label {
+  font-weight: 500;
+  color: #333;
+}
+
+.qr-input {
   padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  transition: border-color 0.3s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.textarea-field {
-  min-height: 100px;
-  resize: vertical;
+.qr-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
 
-.datetime-group {
-  display: flex;
-  gap: 1rem;
-}
-
-.datetime-group .input-field {
-  flex: 1;
-}
-
-.add-button {
+.generate-button {
   padding: 0.75rem 1.5rem;
-  background-color: #646cff;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  align-self: flex-start;
+  width: 100%;
+}
+
+.generate-button:hover {
+  background-color: #357ae8;
+}
+
+.generate-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.qr-code-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px dashed #ddd;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.qr-code-image {
+  max-width: 100%;
+  height: auto;
+}
+
+.download-button {
+  padding: 0.5rem 1rem;
+  background-color: #50c878;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
   transition: background-color 0.3s;
+  width: 100%;
 }
 
-.add-button:hover {
-  background-color: #535bf2;
+.download-button:hover {
+  background-color: #3eb489;
 }
 
-.notes-list, .events-list {
+/* QR Code Scanner Styles */
+.qrcode-scanner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.scanner-controls {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.note-item, .event-item {
-  background-color: white;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  text-align: left;
-}
-
-.note-header, .event-header {
+.upload-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.note-header h3, .event-header h3 {
-  margin: 0;
+.file-upload-label {
+  padding: 0.75rem 1.5rem;
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: inline-block;
+  text-align: center;
+  flex: 1;
+  min-width: 120px;
 }
 
-.delete-button {
+.file-upload-label:hover {
+  background-color: #357ae8;
+}
+
+.camera-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #50c878;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex: 1;
+  min-width: 120px;
+}
+
+.camera-button:hover:not(:disabled) {
+  background-color: #3eb489;
+}
+
+.camera-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.stop-button {
+  padding: 0.75rem 1.5rem;
   background-color: #ff6b6b;
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 0.5rem 1rem;
   cursor: pointer;
+  transition: background-color 0.3s;
+  flex: 1;
+  min-width: 120px;
 }
 
-.delete-button:hover {
+.stop-button:hover {
   background-color: #ff5252;
 }
 
-.event-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.reminder-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #e3f2fd;
-  padding: 0.5rem;
-  border-radius: 4px;
-}
-
-.test-reminder-button {
-  background-color: #2196f3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  cursor: pointer;
+.paste-instruction {
+  color: #666;
   font-size: 0.9rem;
+  padding: 0.5rem;
+  background-color: #f0f8ff;
+  border-radius: 4px;
+  border-left: 3px solid #4a90e2;
 }
 
-.test-reminder-button:hover {
-  background-color: #0b7dda;
+.camera-view {
+  margin: 1rem 0;
+  text-align: center;
+  width: 100%;
 }
 
-.reminder-section {
+.camera-view video {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.error-message {
+  padding: 1rem;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.scan-result {
+  padding: 1.5rem;
+  background-color: #e8f5e9;
+  border-radius: 8px;
+  border: 1px solid #c8e6c9;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.scan-result h3 {
+  margin-top: 0;
+  color: #2e7d32;
+}
+
+.result-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem 0;
+  gap: 1rem;
 }
 
-.reminder-section label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
+.result-content p {
+  word-break: break-all;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 0;
+}
+
+.result-link {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  background-color: #4a90e2;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  width: fit-content;
+}
+
+.result-link:hover {
+  background-color: #357ae8;
+}
+
+/* 响应式设计优化 */
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 1.5rem;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .content-wrapper {
+    padding: 0.75rem;
+  }
+  
+  .generate-button,
+  .download-button,
+  .file-upload-label,
+  .camera-button,
+  .stop-button {
+    padding: 0.75rem;
+  }
+  
+  .upload-section {
+    flex-direction: column;
+  }
+  
+  .qr-code-display {
+    padding: 0.75rem;
+  }
+  
+  .result-content p {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .paste-instruction {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header-simple {
+    padding: 0.75rem;
+  }
+  
+  .app-title {
+    font-size: 1.3rem;
+  }
+  
+  .tab-button {
+    padding: 0.6rem 0.25rem;
+    font-size: 0.85rem;
+  }
+  
+  .content-wrapper {
+    padding: 0.5rem;
+  }
+  
+  .qr-input-group label {
+    font-size: 0.95rem;
+  }
+  
+  .camera-view video {
+    max-height: 300px;
+  }
+}
+
+/* PC端大屏幕优化 */
+@media (min-width: 1024px) {
+  .content-wrapper {
+    max-width: 800px;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin: 1rem;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+  }
+  
+  .tab-button {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+  
+  .generate-button,
+  .download-button {
+    width: auto;
+    align-self: flex-start;
+  }
+  
+  .upload-section {
+    flex-direction: row;
+  }
+  
+  .file-upload-label,
+  .camera-button,
+  .stop-button {
+    width: auto;
+    flex: 0 1 auto;
+  }
+  
+  .qr-code-image {
+    max-width: 300px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .content-wrapper {
+    max-width: 900px;
+    padding: 2.5rem;
+  }
+  
+  .app-title {
+    font-size: 2.2rem;
+  }
+  
+  .tab-button {
+    padding: 1.2rem 2.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .qr-code-image {
+    max-width: 400px;
+  }
 }

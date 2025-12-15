@@ -1,35 +1,13 @@
-function App() {
-  const [count, setCount] = useState(0);
-  const [debugResult, setDebugResult] = useState("");
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 
-  const handleWriteData = async () => {
-    // 调用写入函数
-    const result = await testPutData();
-    setDebugResult(result);
-  };
-async function testPutData() {
-  try {
-    // 初始化EdgeKV实例
-    const edgeKV = new EdgeKV({ namespace: "demo" });
-    
-    // 写入字符串数据
-    let result = await edgeKV.put("test_key", "Hello World");
-    
-    if (result === undefined) {
-      console.log("数据写入成功");
-      return "EdgeKV put success";
-    } else {
-      console.log("数据写入失败");
-      return "EdgeKV put failed";
-    }
-  } catch (error) {
-    console.error("写入错误:", error);
-    return "EdgeKV put error: " + error;
-  }
-}
+function App() {
+  const [count, setCount] = useState(0)
+
   return (
     <>
-      {/* 原有内容 */}
       <div>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
@@ -43,22 +21,68 @@ async function testPutData() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
+
+        <button onClick={handleRequest}>测试</button>
+
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
       </div>
-      
-      {/* 添加调试按钮 */}
-      <div className="debug-section">
-        <button onClick={handleWriteData}>
-          写入KV数据
-        </button>
-        <p>调试结果: {debugResult}</p>
-      </div>
-      
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
     </>
   )
 }
+
+
+// async function handleRequest(request) {
+//   try {
+//     const edgeKV = new EdgeKV({ namespace: "demo" });
+//     let getType = { type: "text" };
+//     let value = await edgeKV.get("key", getType);
+//     if (value === undefined) {
+//       return "EdgeKV get: key not found";
+//     } else {
+//       return new Response(value);
+//     }
+//   } catch (e) {
+//     return "EdgeKV get error" + e;
+//   }
+// }
+
+
+async function handleRequest(request) {
+  try {
+    const edgeKV = new EdgeKV({ namespace: "demo" });
+    let data = await edgeKV.put("put_string", "string_value")
+    // await edgeKV.put("put_stream", new HTMLStream("test_stream", []));
+    // await edgeKV.put("put_array_buffer", getArrayBuffer());
+    // await edgeKV.put("put_array_buffer", new Response("test");
+    if (data === undefined) {
+      return "EdgeKV put success\n";
+    } else {
+      return "EdgeKV put failed\n";
+    }
+  } catch (e) {
+    return "EdgeKV put error" + e;
+  }
+}
+
+
+// async function handleRequest() {
+//   try {
+//     const edgeKV = new EdgeKV({ namespace: "demo" });
+//     let resp = await edgeKV.delete("key");
+//     if (resp) {
+//       return "EdgeKV delete success";
+//     } else {
+//       return "EdgeKV delete failed";
+//     }
+//   }
+//   catch (e) {
+//     return "EdgeKV delete error" + e;
+//   }
+// }
+
+export default App

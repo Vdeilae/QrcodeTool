@@ -139,23 +139,37 @@ const QRCodeScanner: React.FC = () => {
   // 启动摄像头
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        // video: { facingMode: 'environment' } 
-          video: { 
-          facingMode: { exact: "environment" } 
-        } 
-      })
+      let stream: MediaStream;
+      
+      // 首先尝试使用后置摄像头
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'environment' } 
+        });
+      } catch (err) {
+        // 如果后置摄像头失败，尝试默认摄像头
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: true 
+          });
+        } catch (fallbackErr) {
+          throw new Error(`无法访问摄像头: ${fallbackErr instanceof Error ? fallbackErr.message : '未知错误'}`);
+        }
+      }
       
       if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        streamRef.current = stream
-        setIsScanning(true)
-        setUseCamera(true)
-        setError('')
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+        setIsScanning(true);
+        setUseCamera(true);
+        setError('');
       }
     } catch (err) {
-      setError('无法访问摄像头，请检查权限设置')
-      console.error('摄像头错误:', err)
+      const errorMsg = err instanceof Error ? err.message : '无法访问摄像头';
+      setError(errorMsg);
+      console.error('摄像头错误:', err);
+      setIsScanning(false);
+      setUseCamera(false);
     }
   }
 
@@ -171,30 +185,43 @@ const QRCodeScanner: React.FC = () => {
 
   // 扫描视频帧
   const scanFrame = () => {
-    if (!isScanning || !videoRef.current || !canvasRef.current) return
+    if (!isScanning || !videoRef.current || !canvasRef.current) return;
     
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    const video = videoRef.current
+    const video = videoRef.current;
     
-    if (ctx && video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-      
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const code = jsQR(imageData.data, imageData.width, imageData.height)
-      
-      if (code) {
-        setScanResult(code.data)
-        // 添加到扫描历史记录
-        addToScanHistory(code.data)
-        stopCamera()
-        return
-      }
+    // 确保视频已准备好
+    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+      requestAnimationFrame(scanFrame);
+      return;
     }
     
-    requestAnimationFrame(scanFrame)
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      setError('无法获取画布上下文');
+      return;
+    }
+    
+    try {
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      
+      if (code) {
+        setScanResult(code.data);
+        addToScanHistory(code.data);
+        stopCamera();
+        return;
+      }
+    } catch (err) {
+      console.error('扫描过程中出错:', err);
+    }
+    
+    requestAnimationFrame(scanFrame);
   }
 
   // 监控扫描状态
@@ -289,7 +316,12 @@ const QRCodeScanner: React.FC = () => {
             autoPlay 
             playsInline 
             muted
-            style={{ width: '100%', maxHeight: '300px' }}
+            onPlay={() => console.log('Video playing')}
+            onError={(e) => {
+              console.error('Video play error:', e);
+              setError('视频播放出错');
+            }}
+            style={{ width: '100%', maxHeight: '300px', objectFit: 'cover' }}
           />
           <canvas ref={canvasRef} style={{ display: 'none' }} />
         </div>

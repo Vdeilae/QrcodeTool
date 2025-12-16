@@ -145,10 +145,18 @@ const QRCodeScanner: React.FC = () => {
       const videoDevices = devices.filter(device => device.kind === 'videoinput');
       setAvailableCameras(videoDevices);
       
-      // 默认选择第一个摄像头
-      if (videoDevices.length > 0 && !selectedCamera) {
-        setSelectedCamera(videoDevices[0].deviceId);
-      }
+    // 默认选择后置摄像头
+    if (videoDevices.length > 0 && !selectedCamera) {
+      // 优先选择后置摄像头（通常标签包含 'back' 或 'environment'）
+      const backCamera = videoDevices.find(camera => 
+        camera.label.toLowerCase().includes('back') || 
+        camera.label.toLowerCase().includes('environment')
+      );
+      
+      // 如果找不到明确的后置摄像头，选择第一个摄像头
+      const cameraToSelect = backCamera || videoDevices[0];
+      setSelectedCamera(cameraToSelect.deviceId);
+    }
     } catch (err) {
       console.error('获取摄像头列表失败:', err);
     }

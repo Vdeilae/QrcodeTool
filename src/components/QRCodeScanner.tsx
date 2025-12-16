@@ -136,57 +136,57 @@ const QRCodeScanner: React.FC = () => {
     reader.readAsDataURL(file)
   }
 
-  // 启动摄像头
-  const startCamera = async () => {
-    try {
-      setError('');
-      
-      // 先清理之前的流
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-      
-      let stream: MediaStream;
-      
-      // 首先尝试使用后置摄像头
-      try {
-        console.log('尝试获取后置摄像头...');
-        stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'environment' } 
-        });
-      } catch (err) {
-        console.log('后置摄像头不可用，尝试默认摄像头...');
-        // 如果后置摄像头失败，尝试默认摄像头
-        stream = await navigator.mediaDevices.getUserMedia({ 
-          video: true 
-        });
-      }
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        
-        // 显式调用 play() 方法
-        try {
-          await videoRef.current.play();
-          console.log('摄像头画面开始播放');
-          setIsScanning(true);
-          setUseCamera(true);
-        } catch (playError) {
-          console.error('播放摄像头画面失败:', playError);
-          setError('无法播放摄像头画面');
-          stream.getTracks().forEach(track => track.stop());
-        }
-      }
-    } catch (err) {
-      console.error('摄像头访问失败:', err);
-      setError('无法访问摄像头，请检查权限设置和设备连接');
-      setIsScanning(false);
-      setUseCamera(false);
-    }
-  }
+const startCamera = async () => {
+  setError('');
+  console.log('【调试】正在尝试启动摄像头...');
 
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: true
+    });
+    console.log('【调试】成功获取视频流:', stream);
+
+    // 保存流引用
+    streamRef.current = stream;
+    
+    // 先设置状态触发渲染
+    setUseCamera(true);
+    // 不再在这里处理 DOM 操作
+  } catch (err: any) {
+    console.error('【调试】摄像头启动失败:', err);
+    setError('无法访问摄像头，请检查权限和设备');
+  }
+};
+
+// 新增：监听 useCamera 状态变化来处理 DOM 操作
+useEffect(() => {
+  if (useCamera && streamRef.current) {
+    // 等待 DOM 更新完成后执行
+    const handleVideoSetup = () => {
+      if (videoRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+        
+        videoRef.current.play()
+          .then(() => {
+            console.log('【调试】视频 play() 成功');
+            setIsScanning(true);
+          })
+          .catch((playError) => {
+            console.error('【调试】视频 play() 失败:', playError);
+            setError('无法播放摄像头画面');
+            stopCamera();
+          });
+      } else {
+        console.error('【调试】无法获取视频元素');
+        setError('无法获取视频元素');
+        stopCamera();
+      }
+    };
+    
+    // 使用 setTimeout 确保 DOM 已更新
+    setTimeout(handleVideoSetup, 0);
+  }
+}, [useCamera]);
   // 停止摄像头
   const stopCamera = () => {
     if (streamRef.current) {
@@ -199,43 +199,30 @@ const QRCodeScanner: React.FC = () => {
 
   // 扫描视频帧
   const scanFrame = () => {
-    if (!isScanning || !videoRef.current || !canvasRef.current) return;
+    if (!isScanning || !videoRef.current || !canvasRef.current) return
     
-    const video = videoRef.current;
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    const video = videoRef.current
     
-    // 确保视频已准备好
-    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
-      requestAnimationFrame(scanFrame);
-      return;
-    }
-    
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) {
-      setError('无法获取画布上下文');
-      return;
-    }
-    
-    try {
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (ctx && video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
       
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const code = jsQR(imageData.data, imageData.width, imageData.height)
       
       if (code) {
-        setScanResult(code.data);
-        addToScanHistory(code.data);
-        stopCamera();
-        return;
+        setScanResult(code.data)
+        // 添加到扫描历史记录
+        addToScanHistory(code.data)
+        stopCamera()
+        return
       }
-    } catch (err) {
-      console.error('扫描过程中出错:', err);
     }
     
-    requestAnimationFrame(scanFrame);
+    requestAnimationFrame(scanFrame)
   }
 
   // 监控扫描状态

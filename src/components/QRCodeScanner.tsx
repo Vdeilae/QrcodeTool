@@ -136,24 +136,38 @@ const QRCodeScanner: React.FC = () => {
     reader.readAsDataURL(file)
   }
 
-  // 启动摄像头
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: true // 先用默认摄像头
-      })
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        streamRef.current = stream
-        setIsScanning(true)
-        setUseCamera(true)
-        setError('')
+const startCamera = async () => {
+  setError('');
+  console.log('【调试】正在尝试启动摄像头...');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: 'environment' } 
+    });
+    console.log('【调试】成功获取视频流:', stream);
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      streamRef.current = stream;
+
+      // 👇 关键：显式调用 play() 并 await
+      try {
+        await videoRef.current.play();
+        console.log('【调试】视频 play() 成功');
+      } catch (playError) {
+        console.error('【调试】视频 play() 失败:', playError);
+        setError('无法播放摄像头画面');
+        return;
       }
-    } catch (err) {
-      setError('无法访问摄像头，请检查权限设置')
-      console.error('摄像头错误:', err)
+
+      setIsScanning(true);
+      setUseCamera(true);
     }
+  } catch (err: any) {
+    console.error('【调试】摄像头启动失败:', err);
+    setError('无法访问摄像头，请检查权限和设备');
   }
+};
 
   // 停止摄像头
   const stopCamera = () => {

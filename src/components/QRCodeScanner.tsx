@@ -136,38 +136,56 @@ const QRCodeScanner: React.FC = () => {
     reader.readAsDataURL(file)
   }
 
-const startCamera = async () => {
-  setError('');
-  console.log('【调试】正在尝试启动摄像头...');
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ 
-      video: { facingMode: 'environment' } 
-    });
-    console.log('【调试】成功获取视频流:', stream);
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
-      streamRef.current = stream;
-
-      // 👇 关键：显式调用 play() 并 await
-      try {
-        await videoRef.current.play();
-        console.log('【调试】视频 play() 成功');
-      } catch (playError) {
-        console.error('【调试】视频 play() 失败:', playError);
-        setError('无法播放摄像头画面');
-        return;
+  // 启动摄像头
+  const startCamera = async () => {
+    try {
+      setError('');
+      
+      // 先清理之前的流
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       }
-
-      setIsScanning(true);
-      setUseCamera(true);
+      
+      let stream: MediaStream;
+      
+      // 首先尝试使用后置摄像头
+      try {
+        console.log('尝试获取后置摄像头...');
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'environment' } 
+        });
+      } catch (err) {
+        console.log('后置摄像头不可用，尝试默认摄像头...');
+        // 如果后置摄像头失败，尝试默认摄像头
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: true 
+        });
+      }
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+        
+        // 显式调用 play() 方法
+        try {
+          await videoRef.current.play();
+          console.log('摄像头画面开始播放');
+          setIsScanning(true);
+          setUseCamera(true);
+        } catch (playError) {
+          console.error('播放摄像头画面失败:', playError);
+          setError('无法播放摄像头画面');
+          stream.getTracks().forEach(track => track.stop());
+        }
+      }
+    } catch (err) {
+      console.error('摄像头访问失败:', err);
+      setError('无法访问摄像头，请检查权限设置和设备连接');
+      setIsScanning(false);
+      setUseCamera(false);
     }
-  } catch (err: any) {
-    console.error('【调试】摄像头启动失败:', err);
-    setError('无法访问摄像头，请检查权限和设备');
   }
-};
 
   // 停止摄像头
   const stopCamera = () => {
@@ -181,30 +199,43 @@ const startCamera = async () => {
 
   // 扫描视频帧
   const scanFrame = () => {
-    if (!isScanning || !videoRef.current || !canvasRef.current) return
+    if (!isScanning || !videoRef.current || !canvasRef.current) return;
     
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    const video = videoRef.current
+    const video = videoRef.current;
     
-    if (ctx && video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-      
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const code = jsQR(imageData.data, imageData.width, imageData.height)
-      
-      if (code) {
-        setScanResult(code.data)
-        // 添加到扫描历史记录
-        addToScanHistory(code.data)
-        stopCamera()
-        return
-      }
+    // 确保视频已准备好
+    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+      requestAnimationFrame(scanFrame);
+      return;
     }
     
-    requestAnimationFrame(scanFrame)
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      setError('无法获取画布上下文');
+      return;
+    }
+    
+    try {
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      
+      if (code) {
+        setScanResult(code.data);
+        addToScanHistory(code.data);
+        stopCamera();
+        return;
+      }
+    } catch (err) {
+      console.error('扫描过程中出错:', err);
+    }
+    
+    requestAnimationFrame(scanFrame);
   }
 
   // 监控扫描状态

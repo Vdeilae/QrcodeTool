@@ -16,6 +16,8 @@ const QRCodeScanner: React.FC = () => {
   const [error, setError] = useState<string>('')
   const [useCamera, setUseCamera] = useState<boolean>(false)
   const [scanHistory, setScanHistory] = useState<HistoryItem[]>([]);
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<string>('');
   
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -136,57 +138,80 @@ const QRCodeScanner: React.FC = () => {
     reader.readAsDataURL(file)
   }
 
-const startCamera = async () => {
-  setError('');
-  console.log('【调试】正在尝试启动摄像头...');
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ 
-      video: true
-    });
-    console.log('【调试】成功获取视频流:', stream);
-
-    // 保存流引用
-    streamRef.current = stream;
-    
-    // 先设置状态触发渲染
-    setUseCamera(true);
-    // 不再在这里处理 DOM 操作
-  } catch (err: any) {
-    console.error('【调试】摄像头启动失败:', err);
-    setError('无法访问摄像头，请检查权限和设备');
-  }
-};
-
-// 新增：监听 useCamera 状态变化来处理 DOM 操作
-useEffect(() => {
-  if (useCamera && streamRef.current) {
-    // 等待 DOM 更新完成后执行
-    const handleVideoSetup = () => {
-      if (videoRef.current) {
-        videoRef.current.srcObject = streamRef.current;
-        
-        videoRef.current.play()
-          .then(() => {
-            console.log('【调试】视频 play() 成功');
-            setIsScanning(true);
-          })
-          .catch((playError) => {
-            console.error('【调试】视频 play() 失败:', playError);
-            setError('无法播放摄像头画面');
-            stopCamera();
-          });
-      } else {
-        console.error('【调试】无法获取视频元素');
-        setError('无法获取视频元素');
-        stopCamera();
+  // 获取可用摄像头列表
+  const getAvailableCameras = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      setAvailableCameras(videoDevices);
+      
+      // 默认选择第一个摄像头
+      if (videoDevices.length > 0 && !selectedCamera) {
+        setSelectedCamera(videoDevices[0].deviceId);
       }
-    };
-    
-    // 使用 setTimeout 确保 DOM 已更新
-    setTimeout(handleVideoSetup, 0);
-  }
-}, [useCamera]);
+    } catch (err) {
+      console.error('获取摄像头列表失败:', err);
+    }
+  };
+
+  const startCamera = async () => {
+    setError('');
+    console.log('【调试】正在尝试启动摄像头...');
+
+    try {
+      // 如果还没有获取摄像头列表，先获取
+      if (availableCameras.length === 0) {
+        await getAvailableCameras();
+      }
+
+      const constraints: MediaStreamConstraints = {
+        video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('【调试】成功获取视频流:', stream);
+
+      // 保存流引用
+      streamRef.current = stream;
+      
+      // 先设置状态触发渲染
+      setUseCamera(true);
+    } catch (err: any) {
+      console.error('【调试】摄像头启动失败:', err);
+      setError('无法访问摄像头，请检查权限和设备');
+    }
+  };
+
+  // 新增：监听 useCamera 状态变化来处理 DOM 操作
+  useEffect(() => {
+    if (useCamera && streamRef.current) {
+      // 等待 DOM 更新完成后执行
+      const handleVideoSetup = () => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+          
+          videoRef.current.play()
+            .then(() => {
+              console.log('【调试】视频 play() 成功');
+              setIsScanning(true);
+            })
+            .catch((playError) => {
+              console.error('【调试】视频 play() 失败:', playError);
+              setError('无法播放摄像头画面');
+              stopCamera();
+            });
+        } else {
+          console.error('【调试】无法获取视频元素');
+          setError('无法获取视频元素');
+          stopCamera();
+        }
+      };
+      
+      // 使用 setTimeout 确保 DOM 已更新
+      setTimeout(handleVideoSetup, 0);
+    }
+  }, [useCamera]);
+
   // 停止摄像头
   const stopCamera = () => {
     if (streamRef.current) {
@@ -251,6 +276,11 @@ useEffect(() => {
     }
   }, []);
 
+  // 在组件挂载时获取摄像头列表
+  useEffect(() => {
+    getAvailableCameras();
+  }, []);
+
   const clearScanHistory = () => {
     setScanHistory([]);
     localStorage.removeItem('qrScanHistory');
@@ -287,6 +317,23 @@ useEffect(() => {
             />
           </label>
           
+          {/* 摄像头选择下拉框 */}
+          {availableCameras.length > 1 && (
+            <select 
+              value={selectedCamera}
+              onChange={(e) => setSelectedCamera(e.target.value)}
+              disabled={isScanning}
+              className="camera-select"
+              style={{ margin: '0 10px', padding: '5px' }}
+            >
+              {availableCameras.map(camera => (
+                <option key={camera.deviceId} value={camera.deviceId}>
+                  {camera.label || `摄像头 ${camera.deviceId.substring(0, 5)}`}
+                </option>
+              ))}
+            </select>
+          )}
+          
           <button 
             onClick={startCamera}
             disabled={isScanning}
@@ -299,6 +346,7 @@ useEffect(() => {
             <button 
               onClick={stopCamera}
               className="stop-button"
+              style={{ marginLeft: '10px' }}
             >
               停止摄像头
             </button>

@@ -142,6 +142,16 @@
   cursor: not-allowed;
 }
 
+.option-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.option-group .generate-button {
+  width: auto;
+}
+
 .qr-code-display {
   display: flex;
   flex-direction: column;
@@ -904,3 +914,4 @@
 .result-link:hover {
   background-color: #0056b3;
 }
+

@@ -9,6 +9,9 @@ interface HistoryItem {
   timestamp: Date;
 }
 
+type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
+
+
 const QRCodeGenerator: React.FC = () => {
   const [text, setText] = useState<string>('https://www.example.com');
   const [qrCode, setqrCode] = useState<string>('');
@@ -16,8 +19,15 @@ const QRCodeGenerator: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [qrType, setQrType] = useState<ErrorCorrectionLevel>('M');
 
-
+  // 定义二维码类型选项
+const qrTypes: { value: ErrorCorrectionLevel; label: string }[] = [
+  { value: 'M', label: 'M型 (标准, 15%)' },
+  { value: 'L', label: 'L型 (低容错, 7%)' },
+  { value: 'H', label: 'H型 (高容错, 30%)' },
+  { value: 'Q', label: 'Q型 (中高容错, 25%)' }
+];
   // 从本地存储加载历史记录
   useEffect(() => {
     const savedHistory = localStorage.getItem('qrGenerationHistory');
@@ -46,6 +56,11 @@ const QRCodeGenerator: React.FC = () => {
     item.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  //判断qrType是否合法
+  const isValidLevel = (level: any): level is ErrorCorrectionLevel => {
+  return ['L', 'M', 'Q', 'H'].includes(level);
+};
+
   const generateQRCode = async () => {
     if (!text.trim()) {
       setError('请输入要生成二维码的内容');
@@ -63,7 +78,9 @@ const QRCodeGenerator: React.FC = () => {
         color: {
           dark: '#000000FF',
           light: '#FFFFFFFF'
-        }
+        },
+        errorCorrectionLevel: qrType, // ← 这里设置：'L' | 'M' | 'Q' | 'H'
+
       });
       
       setqrCode(url);
@@ -135,14 +152,33 @@ const QRCodeGenerator: React.FC = () => {
           
         />
       </div>
+<div className="qr-options">
 
-      <button 
-        onClick={generateQRCode}
-        disabled={isGenerating}
-        className="generate-button"
-      >
-        {isGenerating ? '生成中...' : '生成二维码'}
-      </button>
+  <div className="option-group">
+
+        <button 
+      onClick={generateQRCode}
+      disabled={isGenerating}
+      className="generate-button"
+    >
+      {isGenerating ? '生成中...' : '生成二维码'}
+    </button>
+    
+    <label>二维码类型:</label>
+    <select 
+      value={qrType} 
+      onChange={(e) => setQrType(e.target.value as ErrorCorrectionLevel)}
+      className="qr-type-select"
+    >
+      {qrTypes.map(type => (
+        <option key={type.value} value={type.value}>
+          {type.label}
+        </option>
+      ))}
+</select>
+
+  </div>
+</div>
 
       {error && (
         <div className="error-message">

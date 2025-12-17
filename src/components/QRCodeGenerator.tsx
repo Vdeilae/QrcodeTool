@@ -57,9 +57,9 @@ const qrTypes: { value: ErrorCorrectionLevel; label: string }[] = [
   );
 
   //判断qrType是否合法
-  const isValidLevel = (level: any): level is ErrorCorrectionLevel => {
-  return ['L', 'M', 'Q', 'H'].includes(level);
-};
+//   const isValidLevel = (level: any): level is ErrorCorrectionLevel => {
+//   return ['L', 'M', 'Q', 'H'].includes(level);
+// };
 
   const generateQRCode = async () => {
     if (!text.trim()) {
@@ -163,7 +163,7 @@ const qrTypes: { value: ErrorCorrectionLevel; label: string }[] = [
     >
       {isGenerating ? '生成中...' : '生成二维码'}
     </button>
-    
+
     <label>二维码类型:</label>
     <select 
       value={qrType} 

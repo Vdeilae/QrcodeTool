@@ -80,6 +80,13 @@ const QRCodeGenerator: React.FC = () => {
     }
   };
 
+    // 新增：处理键盘事件
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      generateQRCode();
+    }
+  };
+
   const downloadQRCode = () => {
     if (!qrCode) return;
     
@@ -116,8 +123,10 @@ const QRCodeGenerator: React.FC = () => {
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyPress={handleKeyPress} // 新增：添加回车事件监听
           placeholder="输入网址或文本内容"
           className="qr-input"
+          
         />
       </div>
 

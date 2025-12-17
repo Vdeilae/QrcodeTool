@@ -57,9 +57,9 @@ const qrTypes: { value: ErrorCorrectionLevel; label: string }[] = [
   );
 
   //判断qrType是否合法
-//   const isValidLevel = (level: any): level is ErrorCorrectionLevel => {
-//   return ['L', 'M', 'Q', 'H'].includes(level);
-// };
+  const isValidLevel = (level: any): level is ErrorCorrectionLevel => {
+  return ['L', 'M', 'Q', 'H'].includes(level);
+};
 
   const generateQRCode = async () => {
     if (!text.trim()) {
@@ -155,30 +155,27 @@ const qrTypes: { value: ErrorCorrectionLevel; label: string }[] = [
 <div className="qr-options">
 
   <div className="option-group">
-
-        <button 
-      onClick={generateQRCode}
-      disabled={isGenerating}
-      className="generate-button"
-    >
-      {isGenerating ? '生成中...' : '生成二维码'}
-    </button>
-
-    <label>二维码类型:</label>
-    <select 
-      value={qrType} 
-      onChange={(e) => setQrType(e.target.value as ErrorCorrectionLevel)}
-      className="qr-type-select"
-    >
-      {qrTypes.map(type => (
-        <option key={type.value} value={type.value}>
-          {type.label}
-        </option>
-      ))}
+    <label>二维码类型：</label>
+<select 
+  value={qrType} 
+  onChange={(e) => setQrType(e.target.value as ErrorCorrectionLevel)}
+  className="qr-type-select"
+>
+  {qrTypes.map(type => (
+    <option key={type.value} value={type.value}>
+      {type.label}
+    </option>
+  ))}
 </select>
-
   </div>
 </div>
+      <button 
+        onClick={generateQRCode}
+        disabled={isGenerating}
+        className="generate-button"
+      >
+        {isGenerating ? '生成中...' : '生成二维码'}
+      </button>
 
       {error && (
         <div className="error-message">

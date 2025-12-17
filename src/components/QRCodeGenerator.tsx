@@ -56,11 +56,6 @@ const qrTypes: { value: ErrorCorrectionLevel; label: string }[] = [
     item.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  //判断qrType是否合法
-  const isValidLevel = (level: any): level is ErrorCorrectionLevel => {
-  return ['L', 'M', 'Q', 'H'].includes(level);
-};
-
   const generateQRCode = async () => {
     if (!text.trim()) {
       setError('请输入要生成二维码的内容');

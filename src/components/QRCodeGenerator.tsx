@@ -15,6 +15,8 @@ const QRCodeGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
 
   // 从本地存储加载历史记录
   useEffect(() => {
@@ -39,6 +41,10 @@ const QRCodeGenerator: React.FC = () => {
     setHistory(newHistory);
     localStorage.setItem('qrGenerationHistory', JSON.stringify(newHistory));
   };
+
+  const filteredHistory = history.filter(item =>
+    item.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const generateQRCode = async () => {
     if (!text.trim()) {
@@ -161,17 +167,25 @@ const QRCodeGenerator: React.FC = () => {
         </div>
       )}
 
-      {/* 生成历史记录 */}
+{/* 生成历史记录 */}
       {history.length > 0 && (
         <div className="generation-history">
           <div className="history-header">
             <h3>生成历史</h3>
+            {/* 新增：搜索框 */}
+            <input
+              type="text"
+              placeholder="搜索历史记录..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="history-search-input"
+            />
             <button onClick={clearHistory} className="clear-history-button">
               清空历史
             </button>
           </div>
           <div className="history-list">
-            {history.map((item, index) => (
+            {filteredHistory.map((item, index) => (
               <div key={item.id} className="history-item">
                 <div className="history-content">
                   <p className="history-text">{item.content}</p>

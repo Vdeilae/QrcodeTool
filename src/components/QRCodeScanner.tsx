@@ -16,6 +16,8 @@ const QRCodeScanner: React.FC = () => {
   const [error, setError] = useState<string>('')
   const [useCamera, setUseCamera] = useState<boolean>(false)
   const [scanHistory, setScanHistory] = useState<HistoryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
   const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>('');
   
@@ -48,6 +50,9 @@ const QRCodeScanner: React.FC = () => {
     localStorage.setItem('qrScanHistory', JSON.stringify(newHistory));
   };
 
+    const filteredScanHistory = scanHistory.filter(item =>
+    item.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   // 生成二维码URL
   const generateQRCodeUrl = async (content: string): Promise<string> => {
     try {
@@ -402,17 +407,25 @@ const QRCodeScanner: React.FC = () => {
         </div>
       )}
 
-      {/* 扫描历史记录 */}
+     {/* 扫描历史记录 */}
       {scanHistory.length > 0 && (
         <div className="scan-history">
           <div className="history-header">
             <h3>扫描历史</h3>
+            {/* 新增：搜索框 */}
+            <input
+              type="text"
+              placeholder="搜索扫描历史..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="history-search-input"
+            />
             <button onClick={clearScanHistory} className="clear-history-button">
               清空历史
             </button>
           </div>
           <div className="history-list">
-            {scanHistory.map((item, index) => (
+            {filteredScanHistory.map((item, index) => (
               <div key={item.id} className="history-item">
                 <div className="history-content">
                   <p className="history-text">{item.content}</p>

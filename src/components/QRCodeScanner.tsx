@@ -143,6 +143,17 @@ const QRCodeScanner: React.FC = () => {
     reader.readAsDataURL(file)
   }
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // 可以添加一个提示，告知用户已复制成功
+      //alert('已复制到剪切板');
+    } catch (err) {
+      console.error('复制失败:', err);
+      //alert('复制失败，请手动复制');
+    }
+  };
+
   // 获取可用摄像头列表
   const getAvailableCameras = async () => {
     try {
@@ -390,23 +401,30 @@ const QRCodeScanner: React.FC = () => {
         </div>
       )}
       
-      {scanResult && (
-        <div className="scan-result">
-          <h3>扫描结果：</h3>
-          <div className="result-content">
-            <p>{scanResult}</p>
-            <a 
-              href={scanResult} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="result-link"
-            >
-              访问链接
-            </a>
-          </div>
-        </div>
-      )}
-
+{scanResult && (
+  <div className="scan-result">
+    <h3>扫描结果：</h3>
+    <div className="result-content">
+      <p>{scanResult}</p>
+      <div className="result-actions">
+        <a 
+          href={scanResult} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="result-link"
+        >
+          访问链接
+        </a>
+        <button 
+          onClick={() => copyToClipboard(scanResult)}
+          className="copy-button"
+        >
+          复制到剪切板
+        </button>
+      </div>
+    </div>
+  </div>
+)}
      {/* 扫描历史记录 */}
       {scanHistory.length > 0 && (
         <div className="scan-history">

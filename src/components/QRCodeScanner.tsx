@@ -178,51 +178,6 @@ const QRCodeScanner: React.FC = () => {
     }
   };
 
-
-// 同样修复 startCamera 函数中的类型错误
-const startCamera = async () => {
-  setError('');
-  console.log('【调试】正在尝试启动摄像头...');
-
-  try {
-    // 检查浏览器支持
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('当前浏览器不支持摄像头访问');
-    }
-
-    // 如果还没有获取摄像头列表，先获取
-    if (availableCameras.length === 0) {
-      await getAvailableCameras();
-    }
-
-    // 确保有可用的摄像头
-    if (availableCameras.length === 0) {
-      throw new Error('未找到可用的摄像头设备');
-    }
-
-    const constraints: MediaStreamConstraints = {
-      video: selectedCamera ? 
-        { deviceId: { exact: selectedCamera } } : 
-        { facingMode: { ideal: 'environment' } } // 备选方案
-    };
-
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    console.log('【调试】成功获取视频流:', stream);
-
-    // 保存流引用
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-    }
-    streamRef.current = stream;
-    
-    // 设置状态
-    setUseCamera(true);
-  } catch (err: any) { // 修复：添加类型断言
-    console.error('【调试】摄像头启动失败:', err);
-    setError(`无法访问摄像头: ${err.message || '请检查权限和设备'}`);
-  }
-};
-
   const startCamera = async () => {
     setError('');
     console.log('【调试】正在尝试启动摄像头...');

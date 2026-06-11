@@ -154,29 +154,73 @@ const QRCodeScanner: React.FC = () => {
     }
   };
 
-  // 获取可用摄像头列表
+  // // 获取可用摄像头列表
+  // const getAvailableCameras = async () => {
+  //   try {
+  //     const devices = await navigator.mediaDevices.enumerateDevices();
+  //     const videoDevices = devices.filter(device => device.kind === 'videoinput');
+  //     setAvailableCameras(videoDevices);
+      
+  //   // 默认选择后置摄像头
+  //   if (videoDevices.length > 0 && !selectedCamera) {
+  //     // 优先选择后置摄像头（通常标签包含 'back' 或 'environment'）
+  //     const backCamera = videoDevices.find(camera => 
+  //       camera.label.toLowerCase().includes('back') || 
+  //       camera.label.toLowerCase().includes('environment')
+  //     );
+      
+  //     // 如果找不到明确的后置摄像头，选择第一个摄像头
+  //     const cameraToSelect = backCamera || videoDevices[0];
+  //     setSelectedCamera(cameraToSelect.deviceId);
+  //   }
+  //   } catch (err) {
+  //     console.error('获取摄像头列表失败:', err);
+  //   }
+  // };
   const getAvailableCameras = async () => {
+  try {
+    console.log('【调试】开始获取摄像头列表...');
+    
+    // 检查API是否支持
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+      console.error('【调试】浏览器不支持enumerateDevices API');
+      setError('浏览器不支持摄像头设备枚举');
+      return;
+    }
+    
+    // 在某些浏览器中，需要先获得权限才能enumerateDevices
+    let hasPermission = false;
     try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      setAvailableCameras(videoDevices);
-      
-    // 默认选择后置摄像头
-    if (videoDevices.length > 0 && !selectedCamera) {
-      // 优先选择后置摄像头（通常标签包含 'back' 或 'environment'）
-      const backCamera = videoDevices.find(camera => 
-        camera.label.toLowerCase().includes('back') || 
-        camera.label.toLowerCase().includes('environment')
-      );
-      
-      // 如果找不到明确的后置摄像头，选择第一个摄像头
-      const cameraToSelect = backCamera || videoDevices[0];
-      setSelectedCamera(cameraToSelect.deviceId);
+      // 尝试获取一次摄像头权限
+      const testStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      testStream.getTracks().forEach(track => track.stop());
+      hasPermission = true;
+      console.log('【调试】已获得摄像头权限');
+    } catch (permErr) {
+      console.warn('【调试】获取初始摄像头权限失败:', permErr);
+      setError('需要摄像头权限才能检测可用设备');
+      return;
     }
-    } catch (err) {
-      console.error('获取摄像头列表失败:', err);
+
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    console.log('【调试】设备列表:', devices);
+    
+    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+    console.log('【调试】可用摄像头数量:', videoDevices.length);
+    console.log('【调试】摄像头详情:', videoDevices);
+    
+    setAvailableCameras(videoDevices);
+    
+    if (videoDevices.length === 0) {
+      setError('未检测到任何摄像头设备');
+    } else {
+      // 选择默认摄像头的逻辑...
     }
-  };
+  } catch (err) {
+    console.error('获取摄像头列表失败:', err);
+    setError('获取摄像头列表失败: ' + err.message);
+  }
+};
 
   const startCamera = async () => {
     setError('');

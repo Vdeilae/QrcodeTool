@@ -177,7 +177,7 @@ const QRCodeScanner: React.FC = () => {
   //     console.error('获取摄像头列表失败:', err);
   //   }
   // };
-  const getAvailableCameras = async () => {
+const getAvailableCameras = async () => {
   try {
     console.log('【调试】开始获取摄像头列表...');
     
@@ -189,14 +189,14 @@ const QRCodeScanner: React.FC = () => {
     }
     
     // 在某些浏览器中，需要先获得权限才能enumerateDevices
-    let hasPermission = false;
+    let permissionGranted = false; // 重命名变量避免未使用警告
     try {
       // 尝试获取一次摄像头权限
       const testStream = await navigator.mediaDevices.getUserMedia({ video: true });
       testStream.getTracks().forEach(track => track.stop());
-      hasPermission = true;
+      permissionGranted = true;
       console.log('【调试】已获得摄像头权限');
-    } catch (permErr) {
+    } catch (permErr: any) { // 添加类型断言
       console.warn('【调试】获取初始摄像头权限失败:', permErr);
       setError('需要摄像头权限才能检测可用设备');
       return;
@@ -214,11 +214,66 @@ const QRCodeScanner: React.FC = () => {
     if (videoDevices.length === 0) {
       setError('未检测到任何摄像头设备');
     } else {
-      // 选择默认摄像头的逻辑...
+      // 选择默认摄像头的逻辑
+      if (videoDevices.length > 0 && !selectedCamera) {
+        // 优先选择后置摄像头
+        const backCamera = videoDevices.find(camera => 
+          camera.label.toLowerCase().includes('back') || 
+          camera.label.toLowerCase().includes('environment')
+        );
+        
+        // 如果找不到明确的后置摄像头，选择第一个摄像头
+        const cameraToSelect = backCamera || videoDevices[0];
+        setSelectedCamera(cameraToSelect.deviceId);
+      }
     }
-  } catch (err) {
+  } catch (err: any) { // 修复：添加类型断言
     console.error('获取摄像头列表失败:', err);
-    setError('获取摄像头列表失败: ' + err.message);
+    setError('获取摄像头列表失败: ' + (err.message || '未知错误'));
+  }
+};
+
+// 同样修复 startCamera 函数中的类型错误
+const startCamera = async () => {
+  setError('');
+  console.log('【调试】正在尝试启动摄像头...');
+
+  try {
+    // 检查浏览器支持
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('当前浏览器不支持摄像头访问');
+    }
+
+    // 如果还没有获取摄像头列表，先获取
+    if (availableCameras.length === 0) {
+      await getAvailableCameras();
+    }
+
+    // 确保有可用的摄像头
+    if (availableCameras.length === 0) {
+      throw new Error('未找到可用的摄像头设备');
+    }
+
+    const constraints: MediaStreamConstraints = {
+      video: selectedCamera ? 
+        { deviceId: { exact: selectedCamera } } : 
+        { facingMode: { ideal: 'environment' } } // 备选方案
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    console.log('【调试】成功获取视频流:', stream);
+
+    // 保存流引用
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    streamRef.current = stream;
+    
+    // 设置状态
+    setUseCamera(true);
+  } catch (err: any) { // 修复：添加类型断言
+    console.error('【调试】摄像头启动失败:', err);
+    setError(`无法访问摄像头: ${err.message || '请检查权限和设备'}`);
   }
 };
 
